@@ -1,0 +1,48 @@
+name: Skool event monitor
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: skool-event-monitor
+  cancel-in-progress: false
+jobs:
+  collect:
+    if: github.repository == 'goosify/dispatch-public-worker'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check whether any communities are due
+        id: preflight
+        run: node scripts/skool/preflight.mjs
+        env:
+          SKOOL_MONITOR_SECRET: ${{ secrets.SKOOL_MONITOR_SECRET }}
+          DISPATCH_URL: ${{ secrets.DISPATCH_URL }}
+      - uses: pnpm/action-setup@v4
+        if: steps.preflight.outputs.due == 'true'
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        if: steps.preflight.outputs.due == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: steps.preflight.outputs.due == 'true'
+      - uses: actions/cache@v4
+        if: steps.preflight.outputs.due == 'true'
+        with:
+          path: ~/.cache/ms-playwright
+          key: skool-chromium-${{ runner.os }}-1.63.0
+      - run: pnpm exec playwright install --with-deps chromium
+        if: steps.preflight.outputs.due == 'true'
+      - name: Collect team sources and prepare reviewed event proposals
+        if: steps.preflight.outputs.due == 'true'
+        run: pnpm exec tsx scripts/skool/monitor.ts
+        env:
+          WORKER_CONFIG: ${{ secrets.WORKER_CONFIG }}
+          SKOOL_STORAGE_STATE: ${{ secrets.SKOOL_STORAGE_STATE }}
+          SKOOL_MONITOR_SECRET: ${{ secrets.SKOOL_MONITOR_SECRET }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          DISPATCH_URL: ${{ secrets.DISPATCH_URL }}

@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {planGroups,urgentEvent,communityDue} from './plan.mjs';
+const now=Date.parse('2026-10-23T12:00:00Z');
+const state={events:[{skool_post_url:'https://www.skool.com/test/post',starts_at:'2026-11-01T12:00:00Z'}],groups:[{group_url:'https://www.skool.com/test',scanned_at:new Date(now-3600000).toISOString()}]};
+assert.deepEqual(planGroups(state,now),[]);
+assert.deepEqual(planGroups({...state,groups:[]},now),['https://www.skool.com/test']);
+assert.deepEqual(planGroups({...state,events:[{...state.events[0],starts_at:'2026-10-23T16:00:00Z'}]},now),['https://www.skool.com/test']);
+assert(urgentEvent('2026-10-23T10:00:00Z',now));assert(!urgentEvent('2026-10-22T10:00:00Z',now));
+assert(communityDue('bad',false,now));assert(!communityDue(new Date(now).toISOString(),false,now));
+assert.throws(()=>planGroups({...state,events:[{...state.events[0],skool_post_url:'https://evil.example/test'}]},now));
+assert.deepEqual(planGroups({events:[],groups:[]},now),[]);
+console.log('PASS: quiet skip, imminent/during-event checks, new communities, invalid timestamps and host validation.');
