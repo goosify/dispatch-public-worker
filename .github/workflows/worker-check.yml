@@ -1,0 +1,13 @@
+name: Worker offline checks
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    if: github.repository == 'goosify/dispatch-public-worker'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/skool/plan.test.mjs
