@@ -127,7 +127,7 @@ try {
   await api("PUT", { status: "failed" }).catch(() => {});
   const message = error instanceof Error ? error.message : "";
   const safe =
-    /^(Dispatch monitor API \d{3}|Community unavailable\.|Dedicated Skool login expired or changed\.|Comments could not be collected\.|Comment response format changed\.)$/.test(
+    /^(Dispatch monitor API \d{3}|Groq extraction failed \(\d{3}\); checkpoint unchanged\.|Community unavailable\.|Dedicated Skool login expired or changed\.|Comments could not be collected\.|Comment response format changed\.)$/.test(
       message,
     )
       ? message
