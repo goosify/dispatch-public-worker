@@ -1,6 +1,8 @@
 name: Skool event monitor
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '7,27,47 * * * *'
 permissions:
   contents: read
 concurrency:
