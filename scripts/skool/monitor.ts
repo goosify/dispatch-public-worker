@@ -47,7 +47,7 @@ if (!planned.length) {
   process.exit(0);
 }
 const browser = await chromium.launch({
-  channel: process.env.CI ? undefined : "chrome",
+  channel: process.env.CI_BROWSER_CHANNEL || (process.env.CI ? undefined : "chrome"),
 });
 let stage = "restore session";
 let calls = 0,

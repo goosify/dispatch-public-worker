@@ -21,7 +21,13 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Prepare browser
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "CI_BROWSER_CHANNEL=chrome" >> "$GITHUB_ENV"
+          else
+            pnpm exec playwright install --with-deps chromium
+          fi
       - name: Check login and restoration without changing events
         run: pnpm exec tsx scripts/skool/check-login.ts
         env:

@@ -52,7 +52,7 @@ async function main() {
   let browser: Browser | undefined;
   try {
     browser = await chromium.launch({
-      channel: process.env.CI ? undefined : "chrome",
+      channel: process.env.CI_BROWSER_CHANNEL || (process.env.CI ? undefined : "chrome"),
     });
     const first = await browser.newContext({ storageState: state });
     await check(first, url, handle);
